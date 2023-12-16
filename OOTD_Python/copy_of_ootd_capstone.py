@@ -300,7 +300,7 @@ def categorize_images(image_folder, json_data, category_mapping, size=(128, 128)
     categories = {'Tops': [], 'Pants': [], 'Shoes': [], 'T - Shirts': []\
                   , 'Jeans': [], 'Sweaters': [], 'Jackets': []}
 
-    for img_path in glob.glob(os.path.join(image_folder, '*.jpg')):  # Update extension if different
+    for img_path in glob.glob(image_folder + '/*.jpg'):  # Update extension if different
         print(f"Processing image: {img_path}")  # Check if this line is printed for each image
         image_name = os.path.basename(img_path)
         category_id = json_data.get(image_name)
@@ -316,40 +316,40 @@ def categorize_images(image_folder, json_data, category_mapping, size=(128, 128)
 
 # Process and categorize images
 
-def load_json_data(json_path):
-    with open(json_path, 'r') as file:
-        return json.load(file)
+# def load_json_data(json_path):
+#     with open(json_path, 'r') as file:
+#         return json.load(file)
+#
+# outfitted = load_json_data(json_path)
+#
+# # Display a sample outfit and its items
+# print("Sample Outfit:", outfitted[0]['name'])
+# print("Items in this outfit:")
+# for item in outfitted[0]['items']:
+#     print(f" - {item['name']} (Category ID: {item['categoryid']})")
 
-outfitted = load_json_data(json_path)
-
-# Display a sample outfit and its items
-print("Sample Outfit:", outfitted[0]['name'])
-print("Items in this outfit:")
-for item in outfitted[0]['items']:
-    print(f" - {item['name']} (Category ID: {item['categoryid']})")
-
-def process_and_categorize_images(outfitted, category_mapping, base_image_folder, size=(128, 128)):
-    categorized_images = {'Tops': [], 'Pants': [], 'Shoes': [], 'T - Shirts': []\
-                            , 'Jeans': [], 'Sweaters': [], 'Jackets': []}  # Adjust categories as needed
-
-    for outfit in outfitted:
-        set_id = outfit['set_id']
-        outfit_folder = os.path.join(base_image_folder, set_id)
-
-        for item in outfit['items']:
-            category_id = item['categoryid']
-            category_name = category_mapping.get(category_id, 'Unknown')
-
-            if category_name in categorized_images:
-                # Process each image in the outfit folder
-                for img_path in glob.glob(os.path.join(outfit_folder, '*.jpg')):
-                    processed_image = process_image(img_path, size)
-                    if processed_image is not None:
-                        categorized_images[category_name].append(processed_image)
-
-    return categorized_images
-
-categorized_images = process_and_categorize_images(outfitted, category_mapping, base_path)
+# def process_and_categorize_images(outfitted, category_mapping, base_image_folder, size=(128, 128)):
+#     categorized_images = {'Tops': [], 'Pants': [], 'Shoes': [], 'T - Shirts': []\
+#                             , 'Jeans': [], 'Sweaters': [], 'Jackets': []}  # Adjust categories as needed
+#
+#     for outfit in outfitted:
+#         set_id = outfit['set_id']
+#         outfit_folder = os.path.join(base_image_folder, set_id)
+#
+#         for item in outfit['items']:
+#             category_id = item['categoryid']
+#             category_name = category_mapping.get(category_id, 'Unknown')
+#
+#             if category_name in categorized_images:
+#                 # Process each image in the outfit folder
+#                 for img_path in glob.glob(os.path.join(outfit_folder, '*.jpg')):
+#                     processed_image = process_image(img_path, size)
+#                     if processed_image is not None:
+#                         categorized_images[category_name].append(processed_image)
+#
+#     return categorized_images
+#
+# categorized_images = process_and_categorize_images(outfitted, category_mapping, base_path)
 
 # Number of samples in the training set
 print("Number of samples in training set:", train.shape[0])
@@ -359,43 +359,43 @@ print("Number of samples in validation set:", val.shape[0])
 
 # Number of samples in the testing set
 print("Number of samples in testing set:", test.shape[0])
-
-# Keperluan Multi Input CNN
-print("Sample JSON data:", list(outfitted.items())[:5])
-print("Sample category mapping:", list(category_mapping.items())[:5])
-
-
-
-# Convert categorized images to numpy arrays
-train_tops = np.array(categorized_images['Tops']) if 'Tops' in categorized_images else np.array([])
-train_pants = np.array(categorized_images['Pants']) if 'Bottoms' in categorized_images else np.array([])
-train_tshirts= np.array(categorized_images['T - Shirts']) if 'Shoes' in categorized_images else np.array([])
-train_shoes = np.array(categorized_images['Shoes']) if 'Shoes' in categorized_images else np.array([])
-train_jeans = np.array(categorized_images['Jeans']) if 'Jeans' in categorized_images else np.array([])
-train_sweaters = np.array(categorized_images['Sweaters']) if 'Sweaters' in categorized_images else np.array([])
-train_jackets = np.array(categorized_images['Jackets']) if 'Jackets' in categorized_images else np.array([])
-#train_suits = np.array(categorized_images['Suits']) if 'Suits' in categorized_images else np.array([])
-
-min_length = min(len(train_tops), len(train_pants), len(train_tshirts), len(train_shoes)\
-                 , len(train_jeans), len(train_sweaters), len(train_jackets), len(train_suits))
-
-print(f"Number of Tops: {len(train_tops)}")
-print(f"Number of Pants: {len(train_pants)}")
-print(f"Number of T Shirt: {len(train_tshirts)}")
-print(f"Number of Shoes: {len(train_shoes)}")
-print(f"Number of Jackets: {len(train_jackets)}")
-print(f"Number of Jeans: {len(train_jeans)}")
-print(f"Number of Sweaters: {len(train_sweaters)}")
-#print(f"Number of Suits: {len(train_suits)}")
-
-train_tops = train_tops[:min_length]
-train_pants = train_pants[:min_length]
-train_tshirts = train_tshirts[:min_length]
-train_shoes = train_shoes[:min_length]
-train_jackets = train_jackets[:min_length]
-train_jeans = train_jeans[:min_length]
-train_sweaters = train_sweaters[:min_length]
-#train_suits = train_suits[:min_length]
+#
+# # Keperluan Multi Input CNN
+# print("Sample JSON data:", list(outfitted.items())[:5])
+# print("Sample category mapping:", list(category_mapping.items())[:5])
+#
+#
+#
+# # Convert categorized images to numpy arrays
+# train_tops = np.array(categorized_images['Tops']) if 'Tops' in categorized_images else np.array([])
+# train_pants = np.array(categorized_images['Pants']) if 'Bottoms' in categorized_images else np.array([])
+# train_tshirts= np.array(categorized_images['T - Shirts']) if 'Shoes' in categorized_images else np.array([])
+# train_shoes = np.array(categorized_images['Shoes']) if 'Shoes' in categorized_images else np.array([])
+# train_jeans = np.array(categorized_images['Jeans']) if 'Jeans' in categorized_images else np.array([])
+# train_sweaters = np.array(categorized_images['Sweaters']) if 'Sweaters' in categorized_images else np.array([])
+# train_jackets = np.array(categorized_images['Jackets']) if 'Jackets' in categorized_images else np.array([])
+# #train_suits = np.array(categorized_images['Suits']) if 'Suits' in categorized_images else np.array([])
+#
+# min_length = min(len(train_tops), len(train_pants), len(train_tshirts), len(train_shoes)\
+#                  , len(train_jeans), len(train_sweaters), len(train_jackets), len(train_suits))
+#
+# print(f"Number of Tops: {len(train_tops)}")
+# print(f"Number of Pants: {len(train_pants)}")
+# print(f"Number of T Shirt: {len(train_tshirts)}")
+# print(f"Number of Shoes: {len(train_shoes)}")
+# print(f"Number of Jackets: {len(train_jackets)}")
+# print(f"Number of Jeans: {len(train_jeans)}")
+# print(f"Number of Sweaters: {len(train_sweaters)}")
+# #print(f"Number of Suits: {len(train_suits)}")
+#
+# train_tops = train_tops[:min_length]
+# train_pants = train_pants[:min_length]
+# train_tshirts = train_tshirts[:min_length]
+# train_shoes = train_shoes[:min_length]
+# train_jackets = train_jackets[:min_length]
+# train_jeans = train_jeans[:min_length]
+# train_sweaters = train_sweaters[:min_length]
+# #train_suits = train_suits[:min_length]
 
 
 
@@ -430,9 +430,12 @@ def create_autoencoder(input_shape):
     decoded = Conv2D(3, (3, 3), activation='sigmoid', padding='same')(x)
 
     autoencoder = Model(input_img, decoded)
-    autoencoder.summary()
+    encoder = Model(input_img, encoded)
 
-    return autoencoder
+    autoencoder.summary()
+    encoder.summary()
+
+    return autoencoder, encoder
 
 """## Define the Multi-Input CNN Model"""
 
@@ -441,38 +444,27 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import RMSprop, Adam
 
 
-def create_multi_input_cnn(input_shapes, num_outputs):
-    # Create separate input layers for each article of clothing
-    inputs = [Input(shape=(128, 128, 3)) for shape in input_shapes]
-    #
-    # # Separate input layers for each type of clothing
-    # input_top = Input(shape=(128, 128, 3))
-    # input_bottom = Input(shape=(128, 128, 3))
-    # input_shoe = Input(shape=(128, 128, 3))
-    # input_tshirt = Input(shape=(128, 128, 3))
-    # input_sweaters = Input(shape=(128, 128, 3))
-    # input_jackets = Input(shape=(128, 128, 3))
-    # input_jeans = Input(shape=(128, 128, 3))
-    # input_pants = Input(shape=(128, 128, 3))
+def create_cnn(input_shape, num_outputs):
+    # Input Layer
+    input_img = Input(shape=input_shape)
 
-    # Define CNN layers for each input
-    conv_branches = []
-    for inp in inputs:
-        x = Conv2D(32, (3, 3), activation='relu')(inp)
-        x = MaxPooling2D((2, 2))(x)
-        x = Conv2D(64, (3, 3), activation='relu')(x)
-        x = MaxPooling2D((2, 2))(x)
-        x = Flatten()(x)
-        conv_branches.append(x)
+    # Convolutional Layers
+    x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
+    x = MaxPooling2D((2, 2))(x)
+    x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+    x = MaxPooling2D((2, 2))(x)
+    x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+    x = MaxPooling2D((2, 2))(x)
 
-    # Merge branches
-    merged = concatenate(conv_branches)
+    # Flatten and Fully Connected Layers
+    x = Flatten()(x)
+    x = Dense(512, activation='relu')(x)
+    x = Dense(124, activation='relu')(x)
+    x = Dense(64, activation='relu')(x)
+    output = Dense(num_outputs, activation='linear')(x)  # Use 'softmax' for classification
 
-    # Fully connected layers
-    x = Dense(64, activation='relu')(merged)
-    output = Dense(num_outputs, activation='linear')(x)
 
-    model = Model(inputs, output)
+    model = Model(input_img, output)
     model.summary()
 
     return model
@@ -480,12 +472,12 @@ def create_multi_input_cnn(input_shapes, num_outputs):
 """## Train the Autoencoder"""
 
 input_shape = (128, 128, 3) # Define the input shape of your images
-autoencoder = create_autoencoder(input_shape)
+autoencoder, encoder = create_autoencoder(input_shape)
 print("Model returned from function.")
 
 # Before fitting, confirm the model summary
-autoencoder.summary()
-optimizer = RMSprop(learning_rate=0.05)
+
+optimizer = RMSprop(learning_rate=0.09)
 autoencoder.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
 
 #Making EarlyStopping
@@ -502,44 +494,56 @@ early_stopping_callback = EarlyStopping(
 
 
 autoencoder.fit(train_images, train_images,
-                epochs=3,
+                epochs=1,
                 batch_size=32,
                 verbose=1,
                 validation_data=(val_images, val_images),
                 callbacks=[early_stopping_callback])
 ''''## BARUUUU'''
 
+autoencoder_train_data = autoencoder.predict(train_images)
+autoencoder_val_data = autoencoder.predict(val_images)
+autoencoder_test_data = autoencoder.predict(test_images)
+
+
+print("predictions autoencoder_train_data shape:", autoencoder_train_data.shape)
+print("predictions autoencoder_train_data:", autoencoder_train_data)
+
+
 input_shapes = (128, 128, 3) # Define the input shapes for each branch
 num_outputs = 1    # For likes prediction
-multi_input_cnn = create_multi_input_cnn(input_shapes, num_outputs)
+cnn = create_cnn(input_shapes, num_outputs)
 
 optimizer_adam = Adam(learning_rate=0.05)
 
-multi_input_cnn.compile(optimizer=optimizer_adam, loss='mean_squared_error', metrics='accuracy')
-multi_input_cnn.fit([train_tops, train_pants, train_tshirts, train_shoes, train_jeans, train_sweaters, train_jackets], train_labels,
-                    epochs=10,
-                    batch_size=32,
-                    validation_data=([val_images, val_images, val_images], val_labels),
-                    callbacks=[early_stopping_callback])
+cnn.compile(optimizer=optimizer_adam, loss='mean_squared_error', metrics='accuracy')
+cnn.fit(autoencoder_train_data, train_labels,
+        epochs=2,
+        batch_size=32,
+        validation_data=(autoencoder_val_data, val_labels),
+        callbacks=[early_stopping_callback])
 
 
 
 """## Evaluate the Models"""
 
 autoencoder.evaluate(test_images, test_images)
-multi_input_cnn.evaluate(test_images, test_images)
+cnn_result = cnn.evaluate(autoencoder_test_data, test_labels,
+                          batch_size=32)
+print("test loss, test acc:", cnn_result)
+
 
 """## Save and Convert the Model for TensorFlow Lite (Optional)"""
 
 # Save the model
-multi_input_cnn.save('multi_input_cnn.h5')
+cnn.save('cnn.h5')
 
 # Convert the model to TensorFlow Lite
-converter = tf.lite.TFLiteConverter.from_keras_model(multi_input_cnn)
+converter = tf.lite.TFLiteConverter.from_keras_model(cnn)
 tflite_model = converter.convert()
 
 # Save the TFLite model
-with open('multi_input_cnn.tflite', 'wb') as f:
+with open('cnn.tflite', 'wb') as f:
     f.write(tflite_model)
 
 
